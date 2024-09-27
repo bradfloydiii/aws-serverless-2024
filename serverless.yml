@@ -1,0 +1,67 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: bradfloydiii
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: aws-node-express-api
+
+frameworkVersion: "4"
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource:
+        - arn:aws:dynamodb:us-east-1:635117829533:table/TodoTable
+
+functions:
+  greeting:
+    handler: src/greeting.handler
+    events:
+      - http:
+          path: /greeting
+          method: get
+
+  addTodo:
+    handler: src/addTodo.handler
+    events:
+      - http:
+          path: /addTodo
+          method: post
+
+  fetchTodos:
+    handler: src/fetchTodos.handler
+    events:
+      - http:
+          path: /todos
+          method: get
+
+  fetchTodo:
+    handler: src/fetchTodo.handler
+    events:
+      - http:
+          path: /todo/{id}
+          method: get
+  
+  updateTodo:
+    handler: src/updateTodo.handler
+    events:
+      - http:
+          path: /todo/{id}
+          method: put
+
+resources:
+  Resources:
+    TodoTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: TodoTable
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
